@@ -1,0 +1,16 @@
+doctype html
+
+html
+  head
+    title Общий зачёт по трофеям
+    meta name="viewport" content="width=device-width,initial-scale=1"
+    = csrf_meta_tags
+    = javascript_importmap_tags
+    = stylesheet_link_tag "application", "data-turbo-track": :reload
+    = stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": :reload
+    body.p-0.m-0.w-screen.h-screen.bg-cover.flex.flex-row.relative class="bg-[url('/img/kamaz.jpg')]"
+      .w-full.h-full.p-6
+        .w-full.h-full.rounded-xl.border-slate-400.border.backdrop-blur-sm.backdrop-brightness-50.p-10.flex.flex-col.space-y-4
+          = render @scores
+      .absolute.top-0.text-center.w-screen
+        .text-amber-300.drop-shadow.text-5xl.w-fit.mx-auto.backdrop-blur-sm.px-4 style="font-family: Impacto, Impact, fantasy, arial" Общий зачёт

@@ -1,0 +1,61 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS (and SCSS, if configured) file within this directory, lib/assets/stylesheets, or any plugin's
+ * vendor/assets/stylesheets directory can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+ * compiled file so the styles you add here take precedence over styles defined in any other CSS
+ * files in this directory. Styles in this file should be added after the last require_* statement.
+ * It is generally better to create a new file per style scope.
+ *
+ *= require_tree .
+ *= require_self
+ */
+
+ .mainapp::-webkit-scrollbar, .i360::-webkit-scrollbar {
+  width: 8px;
+  height: 10px;
+}
+
+/* Track */
+
+.mainapp::-webkit-scrollbar-track, .i360::-webkit-scrollbar-track {
+  border-radius: 0;
+  background: #4a90e2;
+  background: white;
+}
+
+/* Handle */
+
+.mainapp::-webkit-scrollbar-thumb, .i360::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+  border: 0px solid #4a90e2;
+}
+
+/* Handle on hover */
+
+.mainapp::-webkit-scrollbar-thumb:hover, .i360::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+/* errors */
+
+.mainapp .field_with_errors {
+    display: flex;
+  }
+
+.mainapp .field_with_errors {
+    width: 100%;
+  }
+
+.mainapp .field_with_errors {
+    flex-direction: column;
+  }
+
+.mainapp .field_with_errors label {
+    --tw-text-opacity: 1;
+    color: rgb(239 68 68 / var(--tw-text-opacity));
+  }

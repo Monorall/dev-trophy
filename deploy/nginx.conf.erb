@@ -1,0 +1,119 @@
+user  www-data;
+# TODO: increase or change to auto if Zabbix slow working alert
+worker_processes  12;
+
+# Изменяет ограничение на число используемых файлов RLIMIT_NOFILE для рабочего процесса.
+worker_rlimit_nofile 1024;
+
+# Уменьшает число системных вызовов gettimeofday(), что приводит к увеличению производительности
+timer_resolution 100ms;
+
+# Директива задаёт приоритет рабочих процессов от -20 до 20 (отрицательное число означает более высокий приоритет).
+worker_priority -5;
+
+#error_log  /var/log/nginx/error.log;
+#error_log  logs/error.log  notice;
+#error_log  logs/error.log  info;
+error_log syslog:server=unix:/dev/log,tag=nginx_error,severity=error;
+
+pid  /run/nginx.pid;
+
+events {
+    #worker_rlimit_nofile/worker_processes
+    worker_connections  512;
+    use epoll;
+}
+
+http {
+
+# Директива задаёт размер корзины в хэш-таблицах имён серверов. Значение по умолчанию зависит от размера строки кэша процессора.
+    server_names_hash_bucket_size 128;
+
+# Директива задаёт максимальный размер хэш-таблиц имён серверов.
+    server_names_hash_max_size 10240;
+
+# Директива разрешает или запрещает выдавать версию nginx'а в сообщениях об ошибках и в строке заголовка ответа "Server".
+   server_tokens off;
+
+# Включить sendfile(). Использование sendfile() экономит системные вызовы, уменьшает число копирований данных,
+# позволяет использовать меньше физической памяти.
+    sendfile       on;
+
+# Директива разрешает или запрещает использовать опции TCP_NOPUSH во FreeBSD или TCP_CORK в Linux.
+# Опции включаются только при использовании sendfile.
+    tcp_nopush     on;
+
+# Директива разрешает или запрещает использовать опцию TCP_NODELAY. Опция включаются только при переходе соединения в состояние keep-alive.
+    tcp_nodelay    on;
+
+# Директива задаёт таймаут, в течение которого keep-alive соединение с клиентом не будет закрыто со стороны сервера.
+# Второй параметр задаёт значение в строке "Keep-Alive: timeout=время" в заголовке ответа.
+    #keepalive_timeout  0;
+    keepalive_timeout  1 1;
+
+# Директива задаёт таймаут при передаче ответа клиенту. Таймаут устанавливается не на всю передачу ответа, а только между двумя операциями записями.
+# Если по истечении этого времени клиент ничего не примет, то nginx закрывает соединение.
+    send_timeout 3m;
+
+# Директива разрешает или запрещает сбрасывать соединение по таймауту. Сброс делается следующим образом — перед закрытием сокета для него ставится опция SO_LINGER с таймаутом 0. После чего при закрытии сокета клиенту отсылается пакет RST, а всё память, связанная с этим сокетом, освобождается.
+# Это позволяет избежать длительного нахождения уже закрытого сокета в состоянии FIN_WAIT1 с заполненными буферами.
+    reset_timedout_connection on;
+
+# Директива задаёт таймаут при чтении тела запроса клиента. Таймаут устанавливается не на всю передачу тела запроса, а только между двумя операциями чтения.
+# Если по истечении этого времени клиент ничего не передаст, то ему возвращается ошибка "Request time out" (408).
+    client_body_timeout 3m;
+
+# Директива задаёт таймаут при чтении заголовка запроса клиента. Если по истечении этого времени клиент не передаст полностью заголовок запроса, то ему возвращается ошибка "Request time out" (408).
+    client_header_timeout 3m;
+
+# Директива задаёт имя каталога для хранения временных файлов с телом запроса клиента.
+# В каталоге может использоваться иерархия подкаталогов до трёх уровней
+    client_body_temp_path /dev/shm/nginx-client-body 1 2;
+
+# Директива задаёт максимально допустимый размер тела запроса клиента, указываемый в строке "Content-Length" в заголовке запроса. Если размер больше заданного, то клиенту возвращается ошибка "Request Entity Too Large" (413).
+# Следует иметь в виду, что браузеры не умеют корректно показывать эту ошибку.
+    client_max_body_size 16m;
+
+# Директива задаёт размер буфера для чтения тела запроса клиента. Если тело запроса больше заданного буфера, то всё тело запроса или только его часть записывается во временный файл.
+# По умолчанию размер одного буфера равен двум размерам страницы, в зависимости от платформы это или 8K, или 16K.
+    client_body_buffer_size 16k;
+
+# Директива задаёт размер буфера для чтения заголовка запроса клиента. Для подавляющего большинства запросов вполне достаточно буфера размером в 1K. Однако если в запросе есть большие cookies или же запрос пришёл от wap-клиента, то он может не поместиться в 1K.
+# Поэтому, если строка запроса или строка заголовка запроса не помещается полностью в этот буфер, то выделяются большие буферы, задаваемые директивой large_client_header_buffers.
+    client_header_buffer_size 32k;
+
+# Директива задаёт максимальное число и размер буферов для чтения большого заголовка запроса клиента. Строка запроса должна быть не больше размера одного буфера, иначе клиенту возвращается ошибка "Request URI too large" (414). Длинная строка заголовка запроса также должна быть не больше размера одного буфера, иначе клиенту возвращается ошибка "Bad request" (400).
+# Буферы выделяются только по мере необходимости. По умолчанию размер одного буфера равен размеру страницы, в зависимости от платформы это или 4K, или 8K. Если по окончании обработки запроса соединение переходит в состояние keep-alive, то эти буферы освобождаются.
+    large_client_header_buffers 16 16k;
+
+# Создаем кеш зону pagecache (память под ключи в 5Мб) с настройками:
+# inactive: xранить кеш 10 минут
+# max_size: максимальный размер кеш данные 50Мб
+    proxy_cache_path /var/cache/nginx levels=2 keys_zone=pagecache:5m inactive=10m max_size=50m;
+
+    include       mime.types;
+
+    default_type  application/octet-stream;
+
+    log_format  main  '$host $remote_addr - $remote_user [$time_local] "$request" '
+                        '$status $body_bytes_sent "$http_referer" '
+                        '"$http_user_agent" "$http_x_forwarded_for"'
+                        'upstream $upstream_addr status:$upstream_status time: $upstream_response_time';
+
+    log_format combined_with_request_time '$remote_addr - $remote_user [$time_local] '
+                    '"$request" $status $body_bytes_sent '
+                    '"$http_referer" "$http_user_agent" "$http_x_forwarded_for" ' $request_time;
+
+    access_log  /var/log/nginx/access.log  main;
+
+    gzip on;
+    gzip_disable "msie6";
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 3;
+    gzip_buffers 16 8k;
+    gzip_http_version 1.1;
+    gzip_types text/plain text/css application/json application/javascript application/x-javascript text/xml application/xml application/xml+rss text/javascript image/svg+xml;
+
+    include /etc/nginx/conf.d/*.conf;
+}

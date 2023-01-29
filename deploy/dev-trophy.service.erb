@@ -1,0 +1,26 @@
+[Unit]
+Description=dev-trophy
+After=syslog.target network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/ingipro/dev-trophy
+<%- @env.each do |k,v| -%>
+Environment="<%= k %>=<%= v -%>"
+<%- end -%>
+ExecStart=bash -c "/ingipro/dev-trophy/bin/rails server -p 3000"
+ExecReload=/bin/kill -TSTP $MAINPID
+ExecStop=/bin/kill -TERM $MAINPID
+StandardOutput=socket://run/systemd/journal/syslog
+StandardError=socket://run/systemd/journal/syslog
+SyslogIdentifier=dev-trophy
+User=<%= @user %>
+Group=<%= @user %>
+
+KillMode=process
+RestartSec=5
+Restart=on-failure
+LimitNOFILE=10000
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,10 @@
+- content_for :title
+  'Рабочее пространство #{@ecosystem.title}
+
+.text-xs.text-sky-300.flex.flex-row.pb-4.pl-6
+  .pr-2 <
+  = link_to 'Рабочие пространства', ecosystems_path, class: "block text-sky-700 hover:text-sky-400"
+
+.text-center.mt-6.mb-4 Проекты и число замечаний
+.flex.flex-col.space-y-4
+  = render @ecosystem.projects

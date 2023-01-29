@@ -1,0 +1,17 @@
+- content_for :title
+  'Замечание #{@issue.title}
+
+.text-xs.text-sky-300.flex.flex-row.pb-4.pl-6
+  .px-2 <
+  = link_to 'Рабочие пространства', ecosystems_path, class: "block text-sky-700 hover:text-sky-400"
+  .px-2 <
+  = link_to "Рабочее пространство #{@issue.document.project.ecosystem.title}", ecosystem_path(@issue.document.project.ecosystem), class: "block text-sky-700 hover:text-sky-400"
+  .px-2 <
+  = link_to "Проект #{@issue.document.project.title}", project_path(@issue.document.project), class: "block text-sky-700 hover:text-sky-400"
+  .px-2 <
+  = link_to "Документ #{@issue.document.title}", document_path(@issue.document), class: "block text-sky-700 hover:text-sky-400"
+
+- unless @issue.thumbnail.nil?
+  = image_tag @issue.thumbnail, class: 'border border-gray mx-auto'
+
+.text-sm.text-gray-500.pt-4 #{@issue.description}

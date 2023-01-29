@@ -1,0 +1,74 @@
+upstream dev-trophy {
+  server 127.0.0.1:3000;
+}
+
+server {
+        listen 80;
+        server_name dev-trophy.ingipro.ml;
+        return 301 https://dev-trophy.ingipro.ml$request_uri;
+
+    location / {
+      root /ingipro/static;
+      add_header 'Access-Control-Allow-Origin' 'https://dev-trophy.ingipro.ml';
+      add_header X-XSS-Protection "1; mode=block";
+      add_header Strict-Transport-Security 'max-age=31536000; includeSubDomains; preload';
+      add_header X-Frame-Options SAMEORIGIN always;
+      add_header Content-Security-Policy "default-src 'self'; img-src 'self' data: https://dev-trophy.ingipro.ml:*; always";
+      add_header Referrer-Policy 'strict-origin-when-cross-origin';
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name static-trophy.ingipro.ml;
+
+    ssl_certificate /etc/nginx/ssl/ingipro.ml.crt;
+    ssl_certificate_key /etc/nginx/ssl/ingipro.ml.key;
+}
+
+server {
+    listen 443 ssl;
+    server_name dev-trophy.ingipro.ml;
+
+    ssl_certificate /etc/nginx/ssl/ingipro.ml.crt;
+    ssl_certificate_key /etc/nginx/ssl/ingipro.ml.key;
+
+    #----- For HTTP2.0
+    # ssl_dhparam /etc/nginx/ssl/dhparam.pem;
+    ssl_prefer_server_ciphers On;
+    ssl_protocols TLSv1.1 TLSv1.2;
+    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK;
+    add_header Strict-Transport-Security max-age=15768000;
+    ssl_stapling on;
+    #----- For HTTP2.0
+
+    root /var/www/html/;
+
+    #access_log off;
+    #access_log /var/log/nginx/{{eco_list}}.{{domain}}.access.log combined_with_request_time;
+    #error_log /var/log/nginx/{{eco_list}}.{{domain}}.error.log;
+    access_log syslog:server=unix:/dev/log,tag=nginx_access;
+    error_log syslog:server=unix:/dev/log,tag=nginx_error,severity=error;
+
+    charset utf-8;
+
+    sendfile on;
+    # TODO: we need change it?
+    client_max_body_size 4096m;
+
+    location / {
+        include /etc/nginx/proxy_params;
+        proxy_pass              http://dev-trophy;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 86400;
+    }
+
+    location /thunbnails/issues/ {
+      root /ingipro;
+    }
+
+    location = /robots.txt  { access_log off; log_not_found off; }
+    location = /favicon.ico { access_log off; log_not_found off; }
+}

@@ -1,0 +1,5 @@
+.spacing-6.bg-slate-800.bg-opacity-50.h-20.w-full.rounded-lg.flex.flex-row
+  .text-slate-300.my-auto.p-4.w-44.text-2xl style="font-family: Impacto, Impact, fantasy, arial" #{score.participant}
+  - if score.trophies && !score.trophies.empty?
+    - JSON.parse(score.trophies).each do |trophy|
+      .w-32.h-full.bg-contain.bg-no-repeat.bg-center.transition.duration-1000.brightness-75.ease-in-out.hover:scale-150.hover:brightness-125 style="background-image: url(#{trophy});"
